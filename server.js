@@ -1,5 +1,8 @@
 const express = require('express')
 const modelo = require('./modelo.js');
+const criarBuscaPerguntas = require('./buscaPerguntas.js');
+
+const buscarPerguntas = criarBuscaPerguntas(modelo);
 
 const app = express()
 app.use(express.json());
@@ -24,7 +27,7 @@ app.get('/', (req, res) => {
 app.get('/perguntas/busca', (req, res) => {
   try {
     const termo = req.query.termo || '';
-    const perguntas = modelo.buscar_perguntas(termo);
+    const perguntas = buscarPerguntas(termo);
     res.json(perguntas);
   }
   catch(erro) {
@@ -73,4 +76,4 @@ app.post('/respostas', (req, res) => {
 const port = 5000;
 app.listen(port, 'localhost', () => {
   console.log(`ESM Forum rodando em ${port}`)
-  });
+});
