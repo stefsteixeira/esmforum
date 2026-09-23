@@ -1,0 +1,25 @@
+classDiagram
+
+class Server {
+    +receberRequisicao()
+}
+
+class PerguntaService {
+    +listar()
+    +buscarPorTermo(termo)
+}
+
+class PerguntaRepository {
+    +listar()
+    +buscarPorTermo(termo)
+    +buscarPorId(id)
+}
+
+class BancoDados {
+    +query()
+    +queryAll()
+}
+
+Server --> PerguntaService
+PerguntaService --> PerguntaRepository
+PerguntaRepository --> BancoDados

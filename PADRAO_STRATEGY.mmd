@@ -1,0 +1,23 @@
+classDiagram
+
+class PerguntaService {
+    -estrategia
+    +ordenar(perguntas)
+}
+
+class EstrategiaOrdenacao {
+    <<interface>>
+    +ordenar(perguntas)
+}
+
+class OrdenarPorRecentes {
+    +ordenar(perguntas)
+}
+
+class OrdenarPorRespostas {
+    +ordenar(perguntas)
+}
+
+PerguntaService --> EstrategiaOrdenacao
+EstrategiaOrdenacao <|.. OrdenarPorRecentes
+EstrategiaOrdenacao <|.. OrdenarPorRespostas

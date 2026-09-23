@@ -1,0 +1,12 @@
+flowchart LR
+
+U[Usuário] --> V[View / Frontend React]
+V -->|Requisição HTTP| C[Controller]
+C --> S[Service]
+S --> M[Model / Repository]
+M --> DB[(Banco de Dados)]
+DB --> M
+M --> S
+S --> C
+C -->|Resposta JSON| V
+V --> U

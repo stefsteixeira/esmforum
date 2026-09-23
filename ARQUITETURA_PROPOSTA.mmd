@@ -1,0 +1,10 @@
+flowchart LR
+
+U[Usuário] --> F[Frontend React]
+F -->|HTTP| R[Rotas / Controllers]
+R --> S[Services]
+S --> RP[Repositories]
+RP --> BD[Acesso ao Banco]
+BD --> DB[(Banco de Dados)]
+S --> N[Serviços auxiliares]
+N --> S

@@ -1,0 +1,12 @@
+flowchart LR
+
+U[Usuário] --> F[Frontend React]
+F -->|Requisições HTTP| S[server.js]
+S --> M[modelo.js]
+M --> B[bd / bd_utils.js]
+B --> DB[(Banco de Dados)]
+DB --> B
+B --> M
+M --> S
+S -->|JSON| F
+F --> U

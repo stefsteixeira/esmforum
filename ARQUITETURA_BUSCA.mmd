@@ -1,0 +1,16 @@
+sequenceDiagram
+
+actor Usuario
+participant Frontend
+participant Server as server.js
+participant Modelo as modelo.js
+participant BD as Banco de Dados
+
+Usuario->>Frontend: Pesquisa uma palavra
+Frontend->>Server: GET /perguntas/busca?termo=...
+Server->>Modelo: buscar_perguntas(termo)
+Modelo->>BD: Consulta com LIKE
+BD-->>Modelo: Perguntas encontradas
+Modelo-->>Server: Resultado
+Server-->>Frontend: JSON
+Frontend-->>Usuario: Exibe resultados

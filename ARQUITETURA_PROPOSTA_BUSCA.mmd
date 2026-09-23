@@ -1,0 +1,19 @@
+sequenceDiagram
+
+actor Usuario
+participant Frontend
+participant Controller
+participant Service
+participant Repository
+participant BD as Banco de Dados
+
+Usuario->>Frontend: Pesquisa uma palavra
+Frontend->>Controller: GET /perguntas/busca?termo=...
+Controller->>Service: buscar(termo)
+Service->>Repository: buscarPorTermo(termo)
+Repository->>BD: SELECT ... LIKE
+BD-->>Repository: Resultados
+Repository-->>Service: Perguntas
+Service-->>Controller: Perguntas
+Controller-->>Frontend: JSON
+Frontend-->>Usuario: Exibe resultados
