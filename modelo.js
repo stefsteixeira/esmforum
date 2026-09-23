@@ -10,12 +10,22 @@ function reconfig_bd(mock_bd) {
 // { id_pergunta: int
 //   texto: int
 //   id_usuario: int
-//   num_respostas: int 
+//   num_respostas: int
 // }
 function listar_perguntas() {
   const perguntas = bd.queryAll('select * from perguntas', []);
   perguntas.forEach(pergunta => pergunta['num_respostas'] = get_num_respostas(pergunta['id_pergunta']));
   return perguntas;
+}
+
+// Busca perguntas que contenham o termo informado no texto
+function buscar_perguntas(termo) {
+  const termoBusca = `%${termo}%`;
+
+  return bd.queryAll(
+    'SELECT * FROM perguntas WHERE texto LIKE ?',
+    [termoBusca]
+  );
 }
 
 function cadastrar_pergunta(texto) {
@@ -45,6 +55,7 @@ function get_num_respostas(id_pergunta) {
 
 exports.reconfig_bd = reconfig_bd;
 exports.listar_perguntas = listar_perguntas;
+exports.buscar_perguntas = buscar_perguntas;
 exports.cadastrar_pergunta = cadastrar_pergunta;
 exports.cadastrar_resposta = cadastrar_resposta;
 exports.get_pergunta = get_pergunta;

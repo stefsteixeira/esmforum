@@ -21,6 +21,17 @@ app.get('/', (req, res) => {
   }
 });
 
+app.get('/perguntas/busca', (req, res) => {
+  try {
+    const termo = req.query.termo || '';
+    const perguntas = modelo.buscar_perguntas(termo);
+    res.json(perguntas);
+  }
+  catch(erro) {
+    res.status(500).json(erro.message);
+  }
+});
+
 app.post('/perguntas', (req, res) => {
   try {
     const id_pergunta = modelo.cadastrar_pergunta(req.body.pergunta);
@@ -62,4 +73,4 @@ app.post('/respostas', (req, res) => {
 const port = 5000;
 app.listen(port, 'localhost', () => {
   console.log(`ESM Forum rodando em ${port}`)
-});
+  });
