@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor Usuario
+    participant Frontend
+    participant Backend
+    participant Modelo
+    participant Banco as Banco de Dados
+
+    Usuario->>Frontend: Informa palavra-chave
+    Frontend->>Backend: Solicita busca de perguntas
+    Backend->>Modelo: buscarPerguntas(termo)
+    Modelo->>Banco: Consulta perguntas pelo termo
+    Banco-->>Modelo: Retorna perguntas encontradas
+    Modelo-->>Backend: Retorna perguntas encontradas
+    Backend-->>Frontend: Retorna resultado da busca
+    Frontend-->>Usuario: Exibe perguntas encontradas

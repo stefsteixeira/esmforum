@@ -1,0 +1,5 @@
+stateDiagram-v2
+    [*] --> Criada : Nova resposta publicada
+    Criada --> NaoLida : Notificação disponibilizada
+    NaoLida --> Lida : Usuário visualiza a notificação
+    Lida --> [*]
