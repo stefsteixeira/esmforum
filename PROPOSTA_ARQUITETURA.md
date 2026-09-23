@@ -288,3 +288,200 @@ Essa abordagem reduz o risco de alterar muitas partes do sistema simultaneamente
 A proposta mantém a arquitetura atual como ponto de partida, mas introduz uma separação mais clara entre apresentação, rotas, serviços, repositórios e persistência.
 
 Essa evolução permitiria que o ESM Forum crescesse de maneira mais organizada conforme novas funcionalidades fossem adicionadas. Os padrões Repository, Strategy e Observer complementariam essa arquitetura, oferecendo soluções específicas para acesso aos dados, variações de comportamento e comunicação orientada a eventos.
+
+---
+
+## Proposta de Arquitetura MVC
+
+Além da evolução em camadas apresentada anteriormente, o ESM Forum também pode ser organizado seguindo os conceitos do padrão arquitetural **MVC (Model-View-Controller)**.
+
+No contexto do backend do projeto, essa separação pode ser interpretada da seguinte forma:
+
+- **Model:** representa os dados, o acesso ao banco e as operações relacionadas às entidades do sistema.
+- **View:** corresponde às respostas enviadas pela API ao cliente, principalmente em formato JSON, que posteriormente são apresentadas pelo frontend React.
+- **Controller:** recebe as requisições HTTP, interpreta os dados enviados pelo usuário, aciona o Model ou os serviços necessários e determina a resposta que será enviada.
+
+Essa organização pode ser aplicada gradualmente às funcionalidades existentes.
+
+## MVC aplicado à busca de perguntas
+
+A primeira funcionalidade considerada é a **busca de perguntas por palavra-chave**, implementada durante o projeto.
+
+### Model
+
+O Model seria responsável por localizar no banco as perguntas correspondentes ao termo pesquisado.
+
+A operação poderia utilizar um repositório específico:
+
+```javascript
+class PerguntaRepository {
+  constructor(bd) {
+    this.bd = bd;
+  }
+
+  buscarPorTermo(termo) {
+    return this.bd.queryAll(
+      'select * from perguntas where texto like ?',
+      [`%${termo}%`]
+    );
+  }
+}
+```
+
+### Controller
+
+O Controller receberia o termo enviado na requisição e solicitaria a busca:
+
+```javascript
+function buscarPerguntas(req, res) {
+  try {
+    const termo = req.query.termo || '';
+    const perguntas = perguntaService.buscar(termo);
+
+    res.json(perguntas);
+  }
+  catch (erro) {
+    res.status(500).json(erro.message);
+  }
+}
+```
+
+### View
+
+Como o backend funciona como uma API, a View pode ser representada pela resposta JSON enviada ao frontend.
+
+Exemplo:
+
+```json
+[
+  {
+    "id_pergunta": 1,
+    "texto": "3+3",
+    "id_usuario": 1
+  }
+]
+```
+
+O frontend React recebe esses dados e é responsável pela apresentação visual dos resultados ao usuário.
+
+## MVC aplicado ao cadastro de respostas
+
+A segunda funcionalidade considerada é o **cadastro de uma resposta em uma pergunta**.
+
+### Model
+
+O Model é responsável por armazenar a nova resposta no banco de dados.
+
+Uma operação equivalente à já existente no sistema é:
+
+```javascript
+function cadastrar_resposta(id_pergunta, texto) {
+  const params = [id_pergunta, texto];
+
+  const result = bd.exec(
+    'INSERT INTO respostas (id_pergunta, texto) VALUES(?, ?) RETURNING id_resposta',
+    params
+  );
+
+  return result.lastInsertRowid;
+}
+```
+
+### Controller
+
+O Controller recebe os dados enviados pelo cliente e solicita ao Model ou ao serviço correspondente o cadastro da resposta.
+
+```javascript
+function cadastrarResposta(req, res) {
+  try {
+    const id_pergunta = req.body.id_pergunta;
+    const resposta = req.body.resposta;
+
+    const id_resposta =
+      respostaService.cadastrar(id_pergunta, resposta);
+
+    res.json({
+      id_resposta: id_resposta
+    });
+  }
+  catch (erro) {
+    res.status(500).json(erro.message);
+  }
+}
+```
+
+### View
+
+Após o cadastro, a API retorna uma resposta JSON contendo o identificador da resposta criada.
+
+Exemplo:
+
+```json
+{
+  "id_resposta": 10
+}
+```
+
+O frontend pode utilizar essa resposta para atualizar a interface apresentada ao usuário.
+
+## Diagrama da proposta MVC
+
+```mermaid
+flowchart LR
+    U[Usuário] --> V[View / Frontend React]
+    V -->|Requisição HTTP| C[Controller]
+    C --> S[Service]
+    S --> M[Model / Repository]
+    M --> DB[(Banco de Dados)]
+
+    DB --> M
+    M --> S
+    S --> C
+    C -->|Resposta JSON| V
+    V --> U
+```
+
+Nesse modelo, o Controller não precisa conhecer os detalhes de persistência. Ele recebe a requisição e delega a operação para os componentes responsáveis pela regra de negócio e pelos dados.
+
+## Exemplo de fluxo MVC completo
+
+Considerando uma busca por palavra-chave, o fluxo completo seria:
+
+1. O usuário informa um termo de pesquisa no frontend.
+2. A View envia uma requisição `GET /perguntas/busca?termo=...`.
+3. O Controller recebe o parâmetro `termo`.
+4. O Controller solicita a operação ao serviço de perguntas.
+5. O serviço utiliza o Model/Repository para consultar o banco.
+6. O banco retorna as perguntas encontradas.
+7. O resultado retorna ao Controller.
+8. O Controller envia os dados em formato JSON.
+9. A View recebe os dados e apresenta as perguntas ao usuário.
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant View as View / React
+    participant Controller
+    participant Service
+    participant Model as Model / Repository
+    participant DB as Banco de Dados
+
+    Usuario->>View: Informa termo de pesquisa
+    View->>Controller: GET /perguntas/busca
+    Controller->>Service: buscar(termo)
+    Service->>Model: buscarPorTermo(termo)
+    Model->>DB: Consulta SQL
+    DB-->>Model: Perguntas encontradas
+    Model-->>Service: Perguntas
+    Service-->>Controller: Resultado
+    Controller-->>View: JSON
+    View-->>Usuario: Exibe perguntas
+```
+
+## Benefícios do MVC para o ESM Forum
+
+A utilização do MVC permitiria separar com maior clareza a comunicação HTTP, os dados e a apresentação da aplicação.
+
+Controllers poderiam ser criados para diferentes recursos, como perguntas, respostas, usuários e notificações, enquanto Models e Repositories ficariam responsáveis pelo acesso aos dados.
+
+Essa organização reduziria a concentração de responsabilidades atualmente existente no `server.js` e facilitaria a evolução do sistema conforme novas funcionalidades fossem adicionadas.
